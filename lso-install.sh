@@ -18,7 +18,7 @@ if ! [ -t 0 ]; then
     echo "Bootstrapping installer..."
     tmpfile=$(mktemp /tmp/installer.XXXXXX)
     curl -s -o "$tmpfile" https://katk1.dev/lso || {
-        echo "Download failed, try installing script and running manually from https://github.com/KatK1/LiveSplitOne-Installer/tree/main"
+        echo "Download failed, try installing script and running manually from https://github.com/KatK1/LiveSplitOne-Installer"
         rm -f "$tmpfile"
         exit 1
     }
