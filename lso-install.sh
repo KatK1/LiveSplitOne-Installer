@@ -3,7 +3,6 @@
 # POSIX-compliant script to download and install LiveSplit One
 # shoutouts to katkiai
 
-
 # some app info
 APP_NAME="LiveSplit One"
 APP_DISPLAY_NAME="LiveSplit One"
