@@ -4,6 +4,7 @@
 # shoutouts to katkiai
 
 # some app info
+APP_NAME_SHORT="LiveSplitOne"
 APP_NAME="LiveSplit One"
 APP_DISPLAY_NAME="LiveSplit One"
 APP_VERSION="1.0"
@@ -129,8 +130,8 @@ linux_install() {
 
     echo "Installing for Linux (amd64)..."
 
-    TARGET_DIR="$HOME/.local/bin/$APP_NAME"
-    mkdir -p "$TARGET_DIR"
+    BINARY_DIR="$HOME/.local/bin/$APP_NAME_SHORT"
+    mkdir -p "$BINARY_DIR"
 
     echo "Downloading Files..."
     curl -L "$LINUX_URL" -o "/tmp/$APP_NAME.tar.gz" || {
@@ -144,30 +145,35 @@ linux_install() {
     }
 
     echo "Extracting..."
-    mv "/tmp/$APP_NAME.png" "$TARGET_DIR/icon.png"
-    tar -xzf "/tmp/$APP_NAME.tar.gz" -C "$TARGET_DIR" || {
+    tar -xzf "/tmp/$APP_NAME.tar.gz" -C "$BINARY_DIR" || {
         echo "Extraction failed"
         exit 1
     }
 
     # desktop entry
     echo "Creating Desktop Entry..."
-    DESKTOP_DIR="$HOME/.local/share/applications"
+    DESKTOP_DIR="$HOME/.local/share/applications/$APP_NAME_SHORT"
+
+    if [ -d "$DESKTOP_DIR/$APP_NAME.desktop" ]; then
+        rm "$DESKTOP_DIR/$APP_NAME.desktop"
+    fi
+
     mkdir -p "$DESKTOP_DIR"
+    mv "/tmp/$APP_NAME.png" "$DESKTOP_DIR/icon.png"
 
     cat > "$DESKTOP_DIR/$APP_NAME.desktop" <<EOF
 [Desktop Entry]
 Version=$APP_VERSION
 Type=Application
 Name=$APP_DISPLAY_NAME
-Exec=$TARGET_DIR/$APP_NAME
-Icon=$TARGET_DIR/icon.png
+Exec="$BINARY_DIR/$APP_NAME"
+Icon="$DESKTOP_DIR/icon.png"
 Terminal=false
 Categories=Utility;
 EOF
 
     chmod +x "$DESKTOP_DIR/$APP_NAME.desktop"
-    chmod +x "$TARGET_DIR/$APP_NAME"
+    chmod +x "$BINARY_DIR/$APP_NAME"
 
     echo "Installation complete!"
 }
