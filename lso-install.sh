@@ -3,12 +3,6 @@
 # POSIX-compliant script to download and install LiveSplit One
 # shoutouts to katkiai
 
-trap 'rm -f /tmp/$APP_NAME.* /tmp/icons.iconset 2>/dev/null' EXIT  # make sure don't accidentally leave any temp files behind :3
-
-# platform-specific download link
-LINUX_URL="https://github.com/LiveSplit/LiveSplitOne/releases/download/latest/LiveSplitOne-x86_64-linux.tar.gz"
-MAC_URL="https://github.com/LiveSplit/LiveSplitOne/releases/download/latest/LiveSplitOne-arm64-macos.tar.gz"
-IMAGE_URL="https://raw.githubusercontent.com/LiveSplit/LiveSplit/refs/heads/master/res/Icon.png"
 
 # some app info
 APP_NAME="LiveSplit One"
@@ -16,19 +10,48 @@ APP_DISPLAY_NAME="LiveSplit One"
 APP_VERSION="1.0"
 BUNDLE_ID="com.LiveSplit.LiveSplitOne"
 
+# make sure don't accidentally leave any temp files behind
+trap 'rm -f /tmp/$APP_NAME.* /tmp/icons.iconset 2>/dev/null' EXIT
+
+# detect if running interactively, or through curl
+if ! [ -t 0 ]; then
+    # not running interactively
+    echo "Bootstrapping installer..."
+    tmpfile=$(mktemp /tmp/installer.XXXXXX)
+    curl -s -o "$tmpfile" https://katk1.dev/lso || {
+        echo "Download failed, try installing script and running manually from https://github.com/KatK1/LiveSplitOne-Installer/tree/main"
+        rm -f "$tmpfile"
+        exit 1
+    }
+
+    chmod +x "$tmpfile"
+    echo  # newline
+    exec "$tmpfile" "$@" < /dev/tty # run script again, interactively
+    exit
+fi
+
+# if reached here, running interactively
+
+# platform-specific download link
+LINUX_URL="https://github.com/LiveSplit/LiveSplitOne/releases/download/latest/LiveSplitOne-x86_64-linux.tar.gz"
+MAC_URL="https://github.com/LiveSplit/LiveSplitOne/releases/download/latest/LiveSplitOne-arm64-macos.tar.gz"
+IMAGE_URL="https://raw.githubusercontent.com/LiveSplit/LiveSplit/refs/heads/master/res/Icon.png"
+
 move_to_applications() {
     TARGET="/Applications/$APP_DIR"
     
     # check if already exists
     if [ -d "$TARGET" ]; then
+        echo  # newline
         echo "Warning: $APP_NAME already exists in Applications folder"
         echo "Choose an option:"
         echo "1) Replace existing version"
         echo "2) Don't install to Applications"
         echo "3) Cancel installation"
+        echo  # newline
         
         while true; do
-            read -p "Enter your choice [1-3]: " choice
+            read -p "Enter your choice [1-3]: " choice  # -n 1 only reads a single input
             case $choice in
                 1)  # replace
                     echo "Removing existing version..."
